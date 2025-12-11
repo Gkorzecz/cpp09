@@ -14,12 +14,15 @@ long long RPN::applyOp(long long a, long long b, char op)
 {
     switch (op)
     {
-        case '+': return a + b;
-        case '-': return a - b;
-        case '*': return a * b;
+        case '+':
+            return (a + b);
+        case '-':
+            return (a - b);
+        case '*':
+            return (a * b);
         case '/':
             if (b == 0) throw std::runtime_error("division by zero");
-            return a / b;
+            return (a / b);
     }
     throw std::runtime_error("invalid operator");
 }
@@ -32,7 +35,7 @@ long long RPN::evaluate(const std::string& expression)
 
     while (ss >> tok)
     {
-        if (tok.size() == 1 && std::isdigit(tok[0]))          // single-digit operand
+        if (tok.size() == 1 && std::isdigit(tok[0]))
         {
             _stack.push_back(tok[0] - '0');
         }
@@ -46,6 +49,7 @@ long long RPN::evaluate(const std::string& expression)
         else
             throw std::runtime_error("invalid token");
     }
-    if (_stack.size() != 1) throw std::runtime_error("malformed expression");
-    return _stack.back();
+    if (_stack.size() != 1)
+        throw std::runtime_error("malformed expression");
+    return (_stack.back());
 }   

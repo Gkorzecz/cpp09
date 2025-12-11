@@ -10,12 +10,39 @@ BitcoinExchange::BitcoinExchange(const std::string& dbFile)
     loadDatabase(dbFile);
 }
 
+BitcoinExchange::~BitcoinExchange()
+{}
+
+BitcoinExchange::BitcoinExchange(const BitcoinExchange &other)
+{
+    this->_exchangeRates = other._exchangeRates;
+}
+
+BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &other)
+{
+    if (this != &other)
+    {
+        this->_exchangeRates = other._exchangeRates;  
+    }
+    return (*this);
+}
+
+const char *BitcoinExchange::OpenFileExc::what() const throw()
+{
+    return ("Error : could not open file");
+}
+
+const char *BitcoinExchange::InvalidRateExc::what() const throw()
+{
+    return ("Error : no valid rate for this date");
+}
+
 std::string BitcoinExchange::trim(const std::string& s)
 {
-    const std::size_t first = s.find_first_not_of(" \t");
+    const std::size_t first = s.find_first_not_of(" ");
     if (first == std::string::npos)
         return ("");
-    const std::size_t last  = s.find_last_not_of(" \t");
+    const std::size_t last  = s.find_last_not_of(" ");
     return (s.substr(first, last - first + 1));
 }
 
@@ -23,25 +50,27 @@ bool BitcoinExchange::isValidDate(const std::string& d)
 {
     if (d.size() != 10 || d[4] != '-' || d[7] != '-')
         return (false);
+
     int y, m, day;
     char c1, c2;
+    int mdays[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
     std::istringstream ss(d);
     if (!(ss >> y >> c1 >> m >> c2 >> day))
         return (false);
-    // if (c1 != '-' || c2 != '-')
-    //     return (false);
-    if (m < 1 || m > 12 || day < 1)
+
+    if (m < 1 || m > 12 || y < 1)
         return (false);
 
-    int mdays[] = {31,28,31,30,31,30,31,31,30,31,30,31};
-    return (day <= mdays[m - 1]);
+    if (day > mdays[m - 1] || day < 1)
+        return (false);
+    return (true);
 }
 
 void BitcoinExchange::loadDatabase(const std::string& filename)
 {
     std::ifstream file(filename.c_str());
     if (!file)
-        throw std::runtime_error("Error: could not open file.");
+        throw OpenFileExc();
 
     std::string line;
     std::string date;
@@ -77,7 +106,7 @@ void BitcoinExchange::processInputFile(const std::string& inputFile) const
 {
     std::ifstream file(inputFile.c_str());
     if (!file)
-        throw std::runtime_error("Error: could not open file.");
+        throw OpenFileExc();
 
     std::string line;
 
@@ -89,7 +118,7 @@ void BitcoinExchange::processInputFile(const std::string& inputFile) const
         size_t sep = line.find('|');
         if (sep == std::string::npos)
         {
-            std::cerr << "Error: bad input => " << line << '\n';
+            std::cout << "Error: bad input => " << line << '\n';
             continue;
         }
 
@@ -97,7 +126,7 @@ void BitcoinExchange::processInputFile(const std::string& inputFile) const
         const std::string valS = trim(line.substr(sep + 1));
         if (!isValidDate(date))
         {
-            std::cerr << "Error: bad input => " << line << '\n';
+            std::cout << "Error: bad input => " << line << '\n';
             continue;
         }
 
@@ -106,17 +135,17 @@ void BitcoinExchange::processInputFile(const std::string& inputFile) const
         char extra;
         if (!(vs >> value) || vs >> extra)
         {
-            std::cerr << "Error: bad input => " << line << '\n';
+            std::cout << "Error: bad input => " << line << '\n';
             continue;
         }
         if (value < 0)
         {
-            std::cerr << "Error: not a positive number.\n";
+            std::cout << "Error: not a positive number.\n";
             continue;
         }
         if (value > 1000)
         {
-            std::cerr << "Error: too large a number.\n";
+            std::cout << "Error: too large a number.\n";
             continue;
         }
         try
@@ -127,7 +156,7 @@ void BitcoinExchange::processInputFile(const std::string& inputFile) const
         }
         catch (const std::exception& e)
         {
-            std::cerr << e.what() << '\n';
+            std::cout << e.what() << std::endl;
         }
     }
 }

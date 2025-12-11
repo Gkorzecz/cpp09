@@ -5,7 +5,7 @@ int main(int argc, char** argv)
 {
     if (argc != 2)
     {
-        std::cerr << "Error" << std::endl;
+        std::cout << "Error" << std::endl;
         return 1;
     }
     RPN calc;
@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     }
     catch (const std::exception&)
     {
-        std::cerr << "Error" << std::endl;
+        std::cout << "Error" << std::endl;
         return 1;
     }
     return 0;

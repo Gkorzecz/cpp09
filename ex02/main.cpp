@@ -45,7 +45,7 @@ int main(int ac, char** av)
 {
     if (ac < 2)
     {
-        std::cerr << "Error" << std::endl;
+        std::cout << "Error" << std::endl;
         return 1;
     }
 
@@ -56,7 +56,7 @@ int main(int ac, char** av)
     {
         if (!validPositive(av[i], v))
         {
-            std::cerr << "Error" << std::endl;
+            std::cout << "Error" << std::endl;
             return 1;
         }
         original.push_back(v);
