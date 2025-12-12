@@ -29,8 +29,9 @@ long long RPN::applyOp(long long a, long long b, char op)
             if (b == 0)
                 throw std::runtime_error("division by zero");
             return (a / b);
+        default :
+            throw std::runtime_error("invalid operator");
     }
-    throw std::runtime_error("invalid operator");
 }
 
 long long RPN::evaluate(const std::string& expression)
@@ -56,7 +57,7 @@ long long RPN::evaluate(const std::string& expression)
             _stack.push_back(applyOp(a, b, token[0]));
         }
         else
-            throw std::runtime_error("invalid tokenen");
+            throw std::runtime_error("invalid token");
     }
     if (_stack.size() != 1)
         throw std::runtime_error("malformed expression");
