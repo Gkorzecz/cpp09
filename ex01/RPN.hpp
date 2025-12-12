@@ -11,8 +11,8 @@ public:
     long long evaluate(const std::string& expression);
 
 private:
-    std::list<long long> _stack;          // our only STL container
-    bool        isOperator(const std::string& tok) const;
+    std::list<long long> _stack;
+    bool        isOperator(const std::string& token) const;
     long long   applyOp(long long a, long long b, char op);
 };
 

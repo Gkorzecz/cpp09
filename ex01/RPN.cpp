@@ -3,11 +3,16 @@
 #include <stdexcept>
 #include <cctype>
 
-RPN::RPN() {}
+RPN::RPN()
+{}
 
-bool RPN::isOperator(const std::string& tok) const
+bool RPN::isOperator(const std::string& token) const
 {
-    return tok.size() == 1 && (tok == "+" || tok == "-" || tok == "*" || tok == "/");
+    if (token.size() != 1)
+        return (false);
+    if (token != "+" && token != "-" && token != "*" && token != "/")
+        return (false);
+    return (true);
 }
 
 long long RPN::applyOp(long long a, long long b, char op)
@@ -21,7 +26,8 @@ long long RPN::applyOp(long long a, long long b, char op)
         case '*':
             return (a * b);
         case '/':
-            if (b == 0) throw std::runtime_error("division by zero");
+            if (b == 0)
+                throw std::runtime_error("division by zero");
             return (a / b);
     }
     throw std::runtime_error("invalid operator");
@@ -31,23 +37,26 @@ long long RPN::evaluate(const std::string& expression)
 {
     _stack.clear();
     std::stringstream ss(expression);
-    std::string tok;
+    std::string token;
 
-    while (ss >> tok)
+    while (ss >> token)
     {
-        if (tok.size() == 1 && std::isdigit(tok[0]))
+        if (token.size() == 1 && std::isdigit(token[0]))
         {
-            _stack.push_back(tok[0] - '0');
+            _stack.push_back(token[0] - '0');
         }
-        else if (isOperator(tok))
+        else if (isOperator(token))
         {
-            if (_stack.size() < 2) throw std::runtime_error("not enough operands");
-            long long b = _stack.back(); _stack.pop_back();
-            long long a = _stack.back(); _stack.pop_back();
-            _stack.push_back(applyOp(a, b, tok[0]));
+            if (_stack.size() < 2)
+                throw std::runtime_error("not enough operands");
+            long long b = _stack.back();
+            _stack.pop_back();
+            long long a = _stack.back();
+            _stack.pop_back();
+            _stack.push_back(applyOp(a, b, token[0]));
         }
         else
-            throw std::runtime_error("invalid token");
+            throw std::runtime_error("invalid tokenen");
     }
     if (_stack.size() != 1)
         throw std::runtime_error("malformed expression");
