@@ -46,27 +46,27 @@ std::string BitcoinExchange::trim(const std::string& s)
     return (s.substr(first, last - first + 1));
 }
 
-bool BitcoinExchange::isValidDate(const std::string& d)
+bool BitcoinExchange::isValidDate(const std::string &date)
 {
-    if (d.size() != 10 || d[4] != '-' || d[7] != '-')
+    if (date.size() != 10 || date[4] != '-' || date[7] != '-')
         return (false);
 
     int y, m, day;
     char c1, c2;
-    int mdays[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
-    std::istringstream ss(d);
+    int daysPmounth[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+    std::istringstream ss(date);
     if (!(ss >> y >> c1 >> m >> c2 >> day))
         return (false);
 
     if (m < 1 || m > 12 || y < 1)
         return (false);
 
-    if (day > mdays[m - 1] || day < 1)
+    if (day > daysPmounth[m - 1] || day < 1)
         return (false);
     return (true);
 }
 
-void BitcoinExchange::loadDatabase(const std::string& filename)
+void BitcoinExchange::loadDatabase(const std::string &filename)
 {
     std::ifstream file(filename.c_str());
     if (!file)
@@ -75,12 +75,6 @@ void BitcoinExchange::loadDatabase(const std::string& filename)
     std::string line;
     std::string date;
     double rate;
-    // if (std::getline(file, line) && line != "date,exchange_rate")
-    // {
-    //     std::istringstream ss(line);
-    //     if (std::getline(ss, date, ',') && (ss >> rate))
-    //         _exchangeRates[date] = rate;
-    // }
     while (std::getline(file, line))
     {
         std::istringstream ss(line);
@@ -89,7 +83,7 @@ void BitcoinExchange::loadDatabase(const std::string& filename)
     }
 }
 
-double BitcoinExchange::getRate(const std::string& date) const
+double BitcoinExchange::getRate(const std::string &date) const
 {
     std::map<std::string,double>::const_iterator it = _exchangeRates.find(date);
     if (it != _exchangeRates.end())
@@ -97,12 +91,12 @@ double BitcoinExchange::getRate(const std::string& date) const
 
     it = _exchangeRates.lower_bound(date);
     if (it == _exchangeRates.begin())
-        throw std::runtime_error("Error: no rate available before " + date);
+        throw InvalidRateExc();
     --it;
     return (it->second);
 }
 
-void BitcoinExchange::processInputFile(const std::string& inputFile) const
+void BitcoinExchange::processInputFile(const std::string &inputFile) const
 {
     std::ifstream file(inputFile.c_str());
     if (!file)
