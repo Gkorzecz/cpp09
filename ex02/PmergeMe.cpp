@@ -35,7 +35,8 @@ void PmergeMe::pairSortVector(std::vector<int>& vec)
 
 void PmergeMe::sortVector(std::vector<int>& vec)
 {
-    if (vec.size() < 2) return;
+    if (vec.size() < 2)
+        return;
     pairSortVector(vec);
 }
 
