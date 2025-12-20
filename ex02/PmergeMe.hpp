@@ -8,7 +8,7 @@ class PmergeMe
 {
     public :
         static void sortVector(std::vector<int>& vec);
-        static void sortDeque (std::deque<int >& deq);
+        static void sortDeque (std::deque<int>& deq);
 
     private :
         static void pairSortVector(std::vector<int>& vec);

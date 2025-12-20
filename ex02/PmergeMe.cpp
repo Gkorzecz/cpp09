@@ -11,7 +11,7 @@ void PmergeMe::pairSortVector(std::vector<int>& vec)
 {
     std::vector<int> leaders;
     std::vector<int> followers;
-    leaders.reserve( (vec.size() + 1) / 2 );
+    leaders.reserve((vec.size() + 1) / 2);
     followers.reserve(vec.size() / 2);
     bool odd = vec.size() & 1;
     int  leftover = odd ? vec.back() : 0;
@@ -44,7 +44,7 @@ void PmergeMe::sortVector(std::vector<int>& vec)
 
 void PmergeMe::insertPendDeque(std::deque<int>& dst, const std::deque<int>& pend)
 {
-    for (size_t i = 0; i < pend.size(); ++i)
+    for (size_t i = 0; i < pend.size(); i++)
         dst.insert(std::lower_bound(dst.begin(), dst.end(), pend[i]), pend[i]);
 }
 

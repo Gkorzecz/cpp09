@@ -1,6 +1,8 @@
 NAME      := RPN
 CPP       := c++
+# CPP		  := g++
 CPPFLAGS  := -Wall -Wextra -Werror -std=c++98
+# CPPFLAGS  := -g
 
 SRC       := main.cpp RPN.cpp
 OBJ_DIR   := obj

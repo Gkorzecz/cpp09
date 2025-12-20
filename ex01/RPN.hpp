@@ -8,12 +8,12 @@ class RPN
 {
 public:
     RPN();
-    long long evaluate(const std::string& expression);
+    long evaluate(const std::string& expression);
 
 private:
-    std::list<long long> _stack;
-    bool        isOperator(const std::string& token) const;
-    long long   applyOp(long long a, long long b, char op);
+    std::list<long> _stack;
+    bool isOperator(const std::string& token) const;
+    long calculate(long a, long b, char op);
 };
 
 #endif

@@ -15,7 +15,7 @@ bool RPN::isOperator(const std::string& token) const
     return (true);
 }
 
-long long RPN::applyOp(long long a, long long b, char op)
+long RPN::calculate(long a, long b, char op)
 {
     switch (op)
     {
@@ -34,7 +34,7 @@ long long RPN::applyOp(long long a, long long b, char op)
     }
 }
 
-long long RPN::evaluate(const std::string& expression)
+long RPN::evaluate(const std::string& expression)
 {
     _stack.clear();
     std::stringstream ss(expression);
@@ -49,17 +49,17 @@ long long RPN::evaluate(const std::string& expression)
         else if (isOperator(token))
         {
             if (_stack.size() < 2)
-                throw std::runtime_error("not enough operands");
-            long long b = _stack.back();
+                throw std::runtime_error("not enough elements");
+            long b = _stack.back();
             _stack.pop_back();
-            long long a = _stack.back();
+            long a = _stack.back();
             _stack.pop_back();
-            _stack.push_back(applyOp(a, b, token[0]));
+            _stack.push_back(calculate(a, b, token[0]));
         }
         else
-            throw std::runtime_error("invalid token");
+            throw std::runtime_error("invalid element");
     }
     if (_stack.size() != 1)
-        throw std::runtime_error("malformed expression");
+        throw std::runtime_error("can't calculate expression");
     return (_stack.back());
 }   

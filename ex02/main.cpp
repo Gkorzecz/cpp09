@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <climits>
 #include <ctime>
-#include <sys/time.h>   // gettimeofday
+#include <sys/time.h>
 
 static double elapsedUs(const timeval& start, const timeval& end)
 {
