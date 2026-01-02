@@ -6,12 +6,14 @@
 #include <string>
 #include <cstdlib>
 #include <climits>
-#include <ctime>
 #include <sys/time.h>
+#include <time.h>
 
-static double elapsedUs(const timeval& start, const timeval& end)
+
+static double timeElapsed(const timespec& start, const timespec& end)
 {
-    return (1e6 * static_cast<double>(end.tv_sec  - start.tv_sec)  + static_cast<double>(end.tv_usec - start.tv_usec));
+    double timeElaps = (end.tv_nsec - start.tv_nsec) / 1000;
+    return (timeElaps);
 }
 
 static bool validPositive(const char* s, int& out)
@@ -20,11 +22,12 @@ static bool validPositive(const char* s, int& out)
         return (false);
     char* end = 0;
     long v = std::strtol(s, &end, 10);
-    if (*end != '\0' || v <= 0 || v > INT_MAX)
+    if (*end || v <= 0 || v > INT_MAX)
         return (false);
     out = static_cast<int>(v);
     return (true);
 }
+
 
 template <typename T>
 void printSeq(const T& c)
@@ -32,18 +35,18 @@ void printSeq(const T& c)
     typename T::const_iterator it = c.begin();
     while (it != c.end())
     {
-        std::cout << *it;
-        if (++it != c.end())
-            std::cout << ' ';
+        std::cout << *it << ' ';
+        it++;
     }
 }
+
 
 int main(int ac, char** av)
 {
     if (ac < 2)
     {
         std::cout << "Error" << std::endl;
-        return 1;
+        return (1);
     }
 
     std::vector<int> original;
@@ -53,37 +56,36 @@ int main(int ac, char** av)
         if (!validPositive(av[i], v))
         {
             std::cout << "Error" << std::endl;
-            return 1;
+            return (1);
         }
         original.push_back(v);
     }
+
     std::cout << "Before: ";
     printSeq(original);
     std::cout << std::endl;
+
     std::vector<int> vec = original;
-    timeval vBeg, vEnd;
-    gettimeofday(&vBeg, 0);
+    timespec t0, t1;
+    clock_gettime(CLOCK_MONOTONIC, &t0);
     PmergeMe::sortVector(vec);
-    gettimeofday(&vEnd, 0);
-    double vecUs = elapsedUs(vBeg, vEnd);
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+    double vecUs = timeElapsed(t0, t1);
 
     std::deque<int> deq(original.begin(), original.end());
-    timeval dBeg, dEnd;
-    gettimeofday(&dBeg, 0);
+    timespec t2, t3;
+    clock_gettime(CLOCK_MONOTONIC, &t2);
     PmergeMe::sortDeque(deq);
-    gettimeofday(&dEnd, 0);
-    double deqUs = elapsedUs(dBeg, dEnd);
+    clock_gettime(CLOCK_MONOTONIC, &t3);
+    double deqUs  = timeElapsed(t2, t3);
 
     std::cout << "After:  ";
     printSeq(vec);
     std::cout << std::endl;
 
     std::cout << std::fixed << std::setprecision(5);
-    std::cout << "Time to process a range of " << original.size() << " elements with std::vector : " 
-              << vecUs << " us" << std::endl;
+    std::cout << "Time to process a range of " << original.size() << " elements with std::vector : " << vecUs << " us" << std::endl;
+    std::cout << "Time to process a range of " << original.size() << " elements with std::deque  : " << deqUs << " us" << std::endl;
 
-    std::cout << "Time to process a range of " << original.size() << " elements with std::deque  : "
-              << deqUs << " us" << std::endl;
-
-    return 0;
+    return (0);
 }
