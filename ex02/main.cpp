@@ -10,10 +10,11 @@
 #include <time.h>
 
 
-static double timeElapsed(const timespec& start, const timespec& end)
+static double timeElapsed(const timespec& a, const timespec& b)
 {
-    double timeElaps = (end.tv_nsec - start.tv_nsec) / 1000;
+    double timeElaps = (b.tv_nsec - a.tv_nsec) / 1e3;
     return (timeElaps);
+    // return    (b.tv_nsec - a.tv_nsec) / 1e3;   // now fractional µs possible
 }
 
 static bool validPositive(const char* s, int& out)
