@@ -1,1 +1,374 @@
 ./PmergeMe $(shuf -i 1-100000 -n 3000)
+
+Ford–Johnson (aka merge-insertion sort) is a comparison-sorting algorithm designed to use very close to the minimum possible number of comparisons. It’s famously tricky because it carefully chooses (1) which elements to compare early, and (2) the order in which the remaining elements get inserted using binary search, so that later insertions search in the smallest possible range.
+
+Below is a “mechanical” explanation with examples, including Jacobsthal numbers and exactly where the binary searches happen.
+
+1) The high-level idea
+
+You start by forming pairs:
+
+Compare each pair and label them:
+
+winner = larger of the pair
+
+loser = smaller of the pair
+
+Key observation:
+
+If you sort the winners, you get a sorted “backbone”.
+
+Every loser is guaranteed to be ≤ its winner, which gives you a natural upper bound when inserting that loser into the backbone.
+
+So the algorithm is:
+
+Pair up elements, compare within each pair → (loser, winner).
+
+Sort the winners recursively (same method).
+
+Insert the losers into the sorted winners, in a special order (Jacobsthal-based), using binary search with an upper bound (the loser’s winner position).
+
+That “special order” is what makes Ford–Johnson strong.
+
+2) Step-by-step with an example
+
+Let’s sort:
+
+A = [7, 2, 6, 3, 5, 1, 4, 8] (8 elements)
+
+Step 1 — Make pairs and compare inside each pair
+
+Pair in input order:
+
+(7, 2) → loser 2, winner 7
+
+(6, 3) → loser 3, winner 6
+
+(5, 1) → loser 1, winner 5
+
+(4, 8) → loser 4, winner 8
+
+So:
+
+Winners: W = [7, 6, 5, 8]
+
+Losers: L = [2, 3, 1, 4]
+
+And each loser is tied to its winner:
+
+2 → 7
+
+3 → 6
+
+1 → 5
+
+4 → 8
+
+Step 2 — Sort the winners (recursively)
+
+Sort W = [7, 6, 5, 8] using the same approach:
+
+Pair winners:
+
+(7, 6) → loser 6, winner 7
+
+(5, 8) → loser 5, winner 8
+
+Winners of winners: [7, 8] → already sorted as [7, 8]
+Now insert losers [6 (→7), 5 (→8)] with bounds:
+
+Insert 6 into positions ≤ position(7) in [7, 8] → search in [ ] before 7 → becomes [6, 7, 8]
+
+Insert 5 into positions ≤ position(8) in [6, 7, 8] → search in [6,7] → becomes [5, 6, 7, 8]
+
+So sorted winners backbone is:
+S = [5, 6, 7, 8]
+
+And importantly, we also now know where each original winner sits in S:
+
+7 at index 2
+
+6 at index 1
+
+5 at index 0
+
+8 at index 3
+
+Step 3 — Insert the original losers with bounded binary search
+
+We must insert 2, 3, 1, 4, each with a bound “≤ its winner”.
+
+Current S = [5, 6, 7, 8]
+
+Loser 2 has winner 7 (index 2) → insert 2 into S[0..2)
+
+Loser 3 has winner 6 (index 1) → insert 3 into S[0..1)
+
+Loser 1 has winner 5 (index 0) → insert 1 into S[0..0) (forced at front)
+
+Loser 4 has winner 8 (index 3) → insert 4 into S[0..3)
+
+But the order we do these insertions matters. Ford–Johnson uses a Jacobsthal-based schedule to minimize total comparisons.
+
+We’ll come back to the exact order in section 4; for now I’ll show what “bounded binary search insertion” means.
+
+Example: Insert 4 with bound winner 8 at index 3:
+
+Allowed range is S[0..3) = [5, 6, 7]
+
+Binary search within [5,6,7] to find insertion point for 4:
+
+compare 4 vs 6 → 4 < 6 → go left
+
+compare 4 vs 5 → 4 < 5 → go left
+
+insert at position 0
+Result: [4, 5, 6, 7, 8]
+
+This is not searching the whole list; the bound saves comparisons.
+
+3) What exactly is happening with binary search here?
+
+When you insert a loser x tied to winner w:
+
+Find the current index of w in the sorted list S.
+
+You only need to search left of w, because you know x ≤ w.
+
+So you binary-search in the prefix: S[0 .. index(w)).
+
+Insert at the lower_bound position inside that prefix.
+
+That is: you search for the first position where element ≥ x, but you never look past w.
+
+Small concrete example
+
+Suppose S = [3, 8, 10, 12, 20]
+Loser x = 9 with winner 12 at index 3.
+
+Search range is [3, 8, 10] (indices 0..2).
+Binary search:
+
+mid=1 → 8, 9>8 → right
+
+mid=2 → 10, 9<10 → left
+Insert position is 2:
+S becomes [3, 8, 9, 10, 12, 20]
+
+4) Why Jacobsthal numbers appear (and what they are)
+Jacobsthal numbers
+
+Defined by:
+
+J(0) = 0
+
+J(1) = 1
+
+J(n) = J(n-1) + 2·J(n-2)
+
+Sequence:
+
+0, 1, 1, 3, 5, 11, 21, 43, ...
+
+What they’re used for in Ford–Johnson
+
+After sorting the winners, you have losers to insert. If you insert them in a naive order, later insertions might search larger prefixes than necessary, increasing comparisons.
+
+Ford–Johnson chooses an insertion schedule that keeps many insertions working in relatively small prefixes. Jacobsthal numbers define milestones for how many elements are already “available” in the backbone when you insert certain losers.
+
+Intuition (practical):
+
+Insert a carefully chosen loser early so the list grows in a way that keeps the later search ranges tight.
+
+Jacobsthal indices tell you “which loser to insert next” to achieve near-optimal comparison counts.
+
+You can think of the losers as being indexed according to the sorted order of their winners.
+
+5) The core structure: “winners backbone” + “pending losers”
+
+Once winners are sorted, you effectively have pairs:
+
+(winner[i], loser[i]) for i = 1..m, where winners are in sorted order.
+
+Typically you build:
+
+main = [winner1, winner2, ..., winnerm] (already sorted)
+
+pend = [loser1, loser2, ..., loserm] aligned so loser i belongs to winner i
+
+There is a special case: one element (often loser of the first pair) is inserted first to start the process (varies by formulation), but the key is:
+
+When inserting loser i, binary search is bounded by position of winner i.
+
+If winner i is at position pos, search range is main[0..pos).
+
+6) The Jacobsthal insertion order (the “which loser next?” part)
+
+Let m be the number of pairs (so number of losers = m).
+
+Define Jacobsthal numbers: J(1)=1, J(2)=1, J(3)=3, J(4)=5, J(5)=11, ...
+
+The schedule is built in blocks between Jacobsthal numbers.
+
+A common way to describe the order:
+
+Take indices: 1..m (losers aligned to sorted winners)
+
+Insert in this pattern:
+
+For k = 3,4,5,... while J(k) ≤ m:
+
+insert loser at index J(k)
+
+then insert losers at indices: J(k) - 1, J(k) - 2, ..., J(k-1) + 1 (descending)
+
+Finally, when the next Jacobsthal number would exceed m:
+
+insert remaining indices from m down to J(last)+1 (descending)
+
+So you “hit” Jacobsthal indices, and in between you fill the gap descending.
+
+Example of the order when m = 8
+
+Jacobsthal numbers relevant: 1, 3, 5 (next is 11 > 8)
+
+Blocks:
+
+Start around J(3)=3: insert 3, then 2 (down to J(2)+1 = 2)
+
+Next J(4)=5: insert 5, then 4 (down to J(3)+1 = 4)
+
+Now remaining indices 8..6 descending: 8, 7, 6
+
+So insertion order of indices:
+3, 2, 5, 4, 8, 7, 6
+(And index 1 is typically treated specially and inserted very early, depending on variant; many implementations insert loser1 first because its bound is smallest.)
+
+If you’ve seen slightly different sequences in code, that’s normal: there are equivalent variants depending on whether you “pre-insert” index 1 and how you represent the initial main chain. The Jacobsthal block idea is the invariant.
+
+7) Full worked miniature example showing indices + bounded searches
+
+Let winners (already sorted) be:
+W = [10, 20, 30, 40, 50, 60, 70, 80] (m=8)
+
+And losers aligned:
+L = [9, 1, 25, 22, 49, 55, 65, 2]
+Meaning:
+
+loser1=9 ≤ 10
+
+loser2=1 ≤ 20
+
+loser3=25 ≤ 30
+
+...
+
+loser8=2 ≤ 80
+
+Main chain starts as:
+S = [10,20,30,40,50,60,70,80]
+
+Now insert losers in Jacobsthal-ish order (excluding 1 for the moment):
+Order: 3,2,5,4,8,7,6 (and insert 1 very early)
+
+Let’s insert loser1 first (common choice):
+
+insert 9 with bound winner1=10 at index 0 → range S[0..0) → forced before 10
+S: [9,10,20,30,40,50,60,70,80]
+
+Now index mapping shifts, but the bound element (winner i) still exists; you locate it each time.
+
+Insert loser3=25 bound winner3=30:
+
+locate 30 in S → position 3
+
+binary search S[0..3) = [9,10,20] for 25 → inserts after 20
+S: [9,10,20,25,30,40,50,60,70,80]
+
+Insert loser2=1 bound winner2=20:
+
+locate 20 → position 2
+
+search S[0..2) = [9,10] for 1 → goes to front
+S: [1,9,10,20,25,30,40,50,60,70,80]
+
+Insert loser5=49 bound winner5=50:
+
+locate 50 → position 7 (in this current list)
+
+search prefix up to 50: [1,9,10,20,25,30,40] for 49 → inserts after 40
+S: [1,9,10,20,25,30,40,49,50,60,70,80]
+
+Insert loser4=22 bound winner4=40:
+
+locate 40 → position 6
+
+search [1,9,10,20,25,30] for 22 → between 20 and 25
+S: [1,9,10,20,22,25,30,40,49,50,60,70,80]
+
+Insert loser8=2 bound winner8=80:
+
+locate 80 → last
+
+search full prefix (still bounded, but big now) for 2 → near front
+S: [1,2,9,10,20,22,25,30,40,49,50,60,70,80]
+
+Insert loser7=65 bound winner7=70:
+
+locate 70
+
+search prefix up to 70 for 65 → between 60 and 70
+S: [1,2,9,10,20,22,25,30,40,49,50,60,65,70,80]
+
+Insert loser6=55 bound winner6=60:
+
+locate 60
+
+search prefix up to 60 for 55 → between 50 and 60
+S: [1,2,9,10,20,22,25,30,40,49,50,55,60,65,70,80]
+
+That’s the mechanism: each insertion has an upper bound, and the Jacobsthal schedule tries to keep later insertions from needing large prefixes too often.
+
+8) Why the insertion order helps (in plain terms)
+
+Binary search on k items costs about ⌈log2(k)⌉ comparisons (sometimes ±1 depending on exact method).
+
+If you insert losers in a bad order, you quickly grow S and many later losers might have large bounds (their winners are far right), causing lots of searches over large prefixes.
+
+Ford–Johnson’s trick:
+
+choose an order so that many inserted elements have small search ranges when they’re inserted,
+
+and only occasionally pay for a larger-range insertion.
+
+Jacobsthal numbers encode a near-optimal way to schedule those costs.
+
+9) Implementation-level notes (what you actually do in code)
+
+A typical implementation outline:
+
+Pair adjacent elements, store pairs (loser, winner).
+
+Recursively sort the list of winners.
+
+Reorder the losers so loser[i] aligns with sorted winners[i].
+
+Build main from sorted winners.
+
+Insert a specific initial loser (often loser of the first winner) into main at the front (bounded by winner1).
+
+Compute insertion index order using Jacobsthal block rule.
+
+For each loser index in that order:
+
+find current position of its winner in main
+
+binary search in main[0..pos(winner))
+
+insert loser there
+
+Two practical details:
+
+Finding winner position: in a linked structure you’d traverse; in an array/vector you can store iterators/indices and update carefully. Many implementations just search for the winner each time (extra cost, but not counted in “comparison optimality” unless you do element comparisons).
+
+Binary search method: use lower_bound logic within the bounded prefix.

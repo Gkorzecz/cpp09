@@ -5,26 +5,27 @@
 #include <vector>
 #include <deque>
 
-static void jacobsthalOrder(size_t n, std::vector<size_t>& out)
+static void jacobsthalOrder(size_t n, std::vector<size_t> &out)
 {
-    if (!n) return;
-    std::vector<size_t> j;
+    if (!n)
+        return;
+    std::vector<size_t> vec;
     for (size_t a = 1, b = 1; b - 1 < n;)
     {
         size_t k = b - 1;
         if (k && k < n)
-            j.push_back(k);
+            vec.push_back(k);
         size_t c = b + 2 * a;
         a = b;
         b = c;
     }
     size_t prev = 0;
-    for (size_t t = 0; t < j.size(); t++)
+    for (size_t t = 0; t < vec.size(); t++)
     {
-        for (size_t i = prev; i < j[t]; ++i)
+        for (size_t i = prev; i < vec[t]; ++i)
             out.push_back(i);
-        out.push_back(j[t]);
-        prev = j[t] + 1;
+        out.push_back(vec[t]);
+        prev = vec[t] + 1;
     }
     for (size_t i = prev; i < n; ++i)
         out.push_back(i);

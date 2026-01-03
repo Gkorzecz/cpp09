@@ -12,9 +12,8 @@
 
 static double timeElapsed(const timespec& a, const timespec& b)
 {
-    double timeElaps = (b.tv_nsec - a.tv_nsec) / 1e3;
-    return (timeElaps);
-    // return    (b.tv_nsec - a.tv_nsec) / 1e3;   // now fractional µs possible
+    double timElaps = (b.tv_nsec - a.tv_nsec) / 1e3;
+    return (timElaps);
 }
 
 static bool validPositive(const char* s, int& out)
