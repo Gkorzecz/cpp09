@@ -21,7 +21,7 @@ static void hasDuplicates(const std::vector<int> &v)
     for (std::size_t i = 0; i < v.size(); ++i)
     {
         if (!dupliTest.insert(v[i]).second)
-            throw std::runtime_error("No duplicates allowed");
+            throw std::invalid_argument("No duplicates allowed");
     }
 }
 
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
     std::cout << "Before: ";
     printContainer(original);
 
-    /* ---------- std::vector ---------- */
+    /* SORTED WITH VECTOR */
     std::vector<int> vec = original;
     timespec t0, t1;
     clock_gettime(CLOCK_MONOTONIC, &t0);
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     clock_gettime(CLOCK_MONOTONIC, &t1);
     double vecUs = timeElapsed(t0, t1);
 
-    /* ---------- std::deque  ---------- */
+    /* SORTED WITH DEQUE */
     std::deque<int> deq(original.begin(), original.end());
     timespec t2, t3;
     clock_gettime(CLOCK_MONOTONIC, &t2);
