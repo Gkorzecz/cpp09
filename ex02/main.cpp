@@ -10,17 +10,19 @@
 
 static double timeElapsed(const timespec &a, const timespec &b)
 {
-    double timElaps = (b.tv_nsec - a.tv_nsec) / 1e3 + (b.tv_sec - a.tv_sec) / 1e6;
-    return (timElaps);
+    long sec  = b.tv_sec  - a.tv_sec;
+    long nsec = b.tv_nsec - a.tv_nsec;
+    return (static_cast<double>(sec) * 1e6 + static_cast<double>(nsec) / 1e3);
 }
 
-static void hasDuplicates(const std::vector<int> &v)
+
+static void hasDuplicates(const std::vector<int> &vec)
 {
     std::set<int> dupliTest;
 
-    for (std::size_t i = 0; i < v.size(); ++i)
+    for (size_t i = 0; i < vec.size(); ++i)
     {
-        if (!dupliTest.insert(v[i]).second)
+        if (!dupliTest.insert(vec[i]).second)
             throw std::invalid_argument("No duplicates allowed");
     }
 }
@@ -46,16 +48,17 @@ static void validateArgs(char *argv[], int argc, std::vector<int> &original)
     }
 }
 
-static void isAlreadySorted(const std::vector<int> &v)
+template <typename Container>
+static void isContainerSorted(Container &C)
 {
-    std::size_t i = 1;
-    while (i < v.size())
+    size_t i = 1;
+    while (i < C.size())
     {
-        if (v[i] < v[i - 1])
+        if (C[i] < C[i - 1])
             return;
         i++;
     }
-    throw std::logic_error("vector is already sorted");
+    throw std::logic_error("Container is sorted");
 }
 
 
@@ -83,7 +86,7 @@ int main(int argc, char* argv[])
     {
         validateArgs(argv, argc, original);
         hasDuplicates(original);
-        isAlreadySorted(original);
+        isContainerSorted(original);
     }
     catch (const std::exception &e)
     {
@@ -121,5 +124,23 @@ int main(int argc, char* argv[])
     std::cout << std::fixed << std::setprecision(5);
     std::cout << "Time to process a range of " << original.size() << " elements with std::vector : " << vecUs << " us\n";
     std::cout << "Time to process a range of " << original.size()   << " elements with std::deque  : " << deqUs << " us\n";
+
+    /* FINAL TEST*/
+    try
+    {
+        isContainerSorted(vec);
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+    try
+    {
+        isContainerSorted(deq);
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << e.what() << std::endl;
+    }
     return (0);
 }

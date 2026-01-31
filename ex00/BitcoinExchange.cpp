@@ -39,10 +39,10 @@ const char *BitcoinExchange::InvalidRateExc::what() const throw()
 
 std::string BitcoinExchange::trim(const std::string& s)
 {
-    const std::size_t first = s.find_first_not_of(" ");
+    const size_t first = s.find_first_not_of(" ");
     if (first == std::string::npos)
         return ("");
-    const std::size_t last  = s.find_last_not_of(" ");
+    const size_t last  = s.find_last_not_of(" ");
     return (s.substr(first, last - first + 1));
 }
 
