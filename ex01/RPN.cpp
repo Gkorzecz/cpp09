@@ -6,6 +6,20 @@
 RPN::RPN()
 {}
 
+RPN::RPN(const RPN &other)
+{
+    (void)other;
+}
+
+RPN RPN::operator=(const RPN &other)
+{
+    (void)other;
+    return (*this);
+}
+
+RPN::~RPN()
+{}
+
 bool RPN::isOperator(const std::string& token) const
 {
     if (token.size() != 1)
@@ -49,7 +63,7 @@ long RPN::evaluate(const std::string& expression)
         else if (isOperator(token))
         {
             if (_stack.size() < 2)
-                throw std::runtime_error("not enough elements");
+                throw std::invalid_argument("not enough elements");
             long b = _stack.back();
             _stack.pop_back();
             long a = _stack.back();
@@ -57,9 +71,9 @@ long RPN::evaluate(const std::string& expression)
             _stack.push_back(calculate(a, b, token[0]));
         }
         else
-            throw std::runtime_error("invalid element");
+            throw std::invalid_argument("invalid element");
     }
     if (_stack.size() != 1)
-        throw std::runtime_error("can't calculate expression");
+        throw std::invalid_argument("can't calculate expression");
     return (_stack.back());
 }   

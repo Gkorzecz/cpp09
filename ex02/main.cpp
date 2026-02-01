@@ -10,7 +10,7 @@
 
 static double timeElapsed(const timespec &a, const timespec &b)
 {
-    long sec  = b.tv_sec  - a.tv_sec;
+    long sec  = b.tv_sec - a.tv_sec;
     long nsec = b.tv_nsec - a.tv_nsec;
     return (static_cast<double>(sec) * 1e6 + static_cast<double>(nsec) / 1e3);
 }
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     }
     catch (const std::exception &e)
     {
-        std::cout << e.what() << std::endl;
+        std::cout << e.what() << " (vector)" << std::endl;
     }
     try
     {
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     }
     catch (const std::exception &e)
     {
-        std::cout << e.what() << std::endl;
+        std::cout << e.what() << " (deque)" << std::endl;
     }
     return (0);
 }
